@@ -1,5 +1,5 @@
 """
-Test for README.md example
+Test for examples/mpf.py and README.md example consistency
 """
 
 import os
@@ -12,26 +12,19 @@ import pytest
 
 from pygridsynth.gridsynth import gridsynth_gates
 
-# Add the parent directory to the path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+# Path to the example file
+EXAMPLE_FILE_PATH = os.path.join(os.path.dirname(__file__), "..", "examples", "mpf.py")
+
+# Constants for example parameters (extracted from examples/mpf.py)
+EXAMPLE_DPS = 128
+EXAMPLE_THETA = "0.5"
+EXAMPLE_EPSILON = "1e-10"
 
 
-# Constants for README example
-README_EXAMPLE_CODE = """import mpmath
-
-from pygridsynth.gridsynth import gridsynth_gates
-
-mpmath.mp.dps = 128
-theta = mpmath.mpmathify("0.5")
-epsilon = mpmath.mpmathify("1e-10")
-
-gates = gridsynth_gates(theta=theta, epsilon=epsilon)
-print(gates)
-"""
-
-README_EXAMPLE_DPS = 128
-README_EXAMPLE_THETA = "0.5"
-README_EXAMPLE_EPSILON = "1e-10"
+def _read_example_file_content() -> str:
+    """Read the content of the examples/mpf.py file"""
+    with open(EXAMPLE_FILE_PATH, "r", encoding="utf-8") as f:
+        return f.read()
 
 
 def _extract_readme_example_code() -> str:
@@ -72,42 +65,35 @@ def _run_standalone_file(file_path: str) -> Tuple[int, str, str]:
     return result.returncode, result.stdout, result.stderr
 
 
-def _setup_readme_example_parameters():
-    mpmath.mp.dps = README_EXAMPLE_DPS
-    theta = mpmath.mpmathify(README_EXAMPLE_THETA)
-    epsilon = mpmath.mpmathify(README_EXAMPLE_EPSILON)
+def _setup_example_parameters():
+    mpmath.mp.dps = EXAMPLE_DPS
+    theta = mpmath.mpmathify(EXAMPLE_THETA)
+    epsilon = mpmath.mpmathify(EXAMPLE_EPSILON)
     return gridsynth_gates(theta=theta, epsilon=epsilon)
 
 
-def test_readme_example_execution():
-    gates = _setup_readme_example_parameters()
+def test_example_execution():
+    gates = _setup_example_parameters()
     assert gates is not None
-    print(f"✓ README example executed successfully, result: {gates}")
+    print(f"✓ Example executed successfully, result: {gates}")
 
 
 def test_readme_example_content_matches():
     readme_example = _extract_readme_example_code()
-    assert readme_example == README_EXAMPLE_CODE
-    print("✓ README example content matches exactly")
+    example_file_content = _read_example_file_content()
+    assert readme_example == example_file_content
+    print("✓ README example content matches examples/mpf.py")
 
 
-def test_readme_example_standalone_file():
-    example_file_path = os.path.join(os.path.dirname(__file__), "readme_example.py")
-
-    # Verify file content
-    with open(example_file_path, "r", encoding="utf-8") as f:
-        file_content = f.read()
-    assert file_content == README_EXAMPLE_CODE
-    print(f"✓ Created standalone example file: {example_file_path}")
-
-    # Test execution
-    returncode, stdout, stderr = _run_standalone_file(example_file_path)
+def test_example_file_execution():
+    # Test direct execution of examples/mpf.py
+    returncode, stdout, stderr = _run_standalone_file(EXAMPLE_FILE_PATH)
     assert returncode == 0, f"Example file execution failed with error: {stderr}"
     assert stdout.strip(), "Example file should produce output"
 
-    print("✓ Standalone example file executed successfully")
+    print(f"✓ examples/mpf.py executed successfully: {EXAMPLE_FILE_PATH}")
 
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
-    print("All README example tests passed!")
+    print("All example tests passed!")
